@@ -1,0 +1,15 @@
+[
+{
+  "modid": "automata",
+  "name": "Automata",
+  "description": "Mechanical minions",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://github.com/Flaxbeard/Cyberware2",
+  "updateUrl": "",
+  "authorList": ["Flaxbeard"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": []
+}
+]
