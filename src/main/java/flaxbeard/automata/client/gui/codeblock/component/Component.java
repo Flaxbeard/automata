@@ -1,7 +1,7 @@
 package flaxbeard.automata.client.gui.codeblock.component;
 
 import flaxbeard.automata.client.gui.GuiProgrammer;
-import flaxbeard.automata.client.gui.codeblock.CodeBlock;
+import flaxbeard.automata.client.gui.codeblock.base.CodeBlock;
 
 public abstract class Component {
 

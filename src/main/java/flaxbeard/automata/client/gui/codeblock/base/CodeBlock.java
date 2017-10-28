@@ -1,10 +1,12 @@
-package flaxbeard.automata.client.gui.codeblock;
+package flaxbeard.automata.client.gui.codeblock.base;
 
 import flaxbeard.automata.Automata;
 import flaxbeard.automata.client.gui.GuiProgrammer;
+import flaxbeard.automata.client.gui.codeblock.CodeBlockRegistry;
 import flaxbeard.automata.client.gui.codeblock.component.BlockSlot;
 import flaxbeard.automata.client.gui.codeblock.component.Component;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
@@ -294,31 +296,23 @@ public abstract class CodeBlock {
         this.slotIn = slotIn;
     }
 
+    public final NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        compound = saveData(compound);
+        ResourceLocation id = CodeBlockRegistry.getId(this);
+        compound.setString(CodeBlockRegistry.ID_STRING, id.toString());
+        return compound;
+    }
 
-   /* public static class FollowingComponent extends SlotComponent {
-        @Override
-        public int getWidth(CodeBlock block, CodeBlock child) {
-            if (child == null) {
-                return 50;
-            }
-            return child.getWidth();
-        }
+    public final void loadFromNBT(NBTTagCompound compound) {
+        loadData(compound);
+    }
 
-        @Override
-        public int getHeight(CodeBlock block, CodeBlock child) {
-            if (child == null) {
-                return 5;
-            }
-            return child.getHeight();
-        }
+    protected NBTTagCompound saveData(NBTTagCompound compound) {
+        return compound;
+    }
 
-        @Override
-        public void drawBackground(GuiProgrammer gui, CodeBlock block, CodeBlock child) {
-            if (child != null) {
-                child.drawBackground(gui);
-            }
-        }
-
-    }*/
+    protected NBTTagCompound loadData(NBTTagCompound compound) {
+        return compound;
+    }
 
 }

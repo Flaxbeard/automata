@@ -2,6 +2,8 @@ package flaxbeard.automata.client.gui;
 
 import flaxbeard.automata.Automata;
 import flaxbeard.automata.client.gui.codeblock.*;
+import flaxbeard.automata.client.gui.codeblock.base.CodeBlock;
+import flaxbeard.automata.client.gui.codeblock.base.CodeBlockStatement;
 import flaxbeard.automata.client.gui.codeblock.component.BlockSlot;
 import flaxbeard.automata.client.gui.codeblock.component.ExpressionSlot;
 import flaxbeard.automata.client.gui.codeblock.component.StringComponent;
@@ -89,92 +91,42 @@ public class GuiProgrammer extends GuiContainer {
 
         codeBlockWrappers = new ArrayList<>();
 
-        String[] texts = {
-                "Go to position",
-                "Attack",
-                "Mine area"
-        };
-
-        int x = 0;
-        int y = 0;
-
-        for (String str : texts) {
+        for (int i = 0; i < 10; i++) {
             codeBlockWrappers.add(
                     new CodeBlockWrapper(
-                            new CodeBlockStatementText(str),
-                            x,
-                            y
+                            new CodeBlockAdd(),
+                            10,
+                            10
                     )
             );
-            x += 10;
-            y += 10;
         }
-
-        codeBlockWrappers.add(
-                new CodeBlockWrapper(
-                        new CodeBlockExpressionTest(
-                                new ExpressionSlot(Type.STRING)
-                        ).setColor("#cea880"),
-                        x,
-                        y
-                )
-        );
-        codeBlockWrappers.add(
-                new CodeBlockWrapper(
-                        new CodeBlockExpressionTest(
-                                new ExpressionSlot(Type.STRING)
-                        ).setColor("#cea880"),
-                        x,
-                        y
-                )
-        );
-        codeBlockWrappers.add(
-                new CodeBlockWrapper(
-                        new CodeBlockExpressionTest(
-                                new ExpressionSlot(Type.STRING)
-                        ).setColor("#cea880"),
-                        x,
-                        y
-                )
-        );
-        codeBlockWrappers.add(
-                new CodeBlockWrapper(
-                        new CodeBlockExpressionTest(
-                                new StringComponent("[B]arshak")
-                        ).setColor("#cecece"),
-                        x,
-                        y
-                )
-        );
-
-
-        codeBlockWrappers.add(
-                new CodeBlockWrapper(
-                        new CodeBlockExpressionTest(
-                                new StringComponent("Current position")
-                        ).setColor("#cecece"),
-                        x,
-                        y
-                )
-        );
-        codeBlockWrappers.add(
-                new CodeBlockWrapper(
-                        new CodeBlockExpressionTest(
-                                new StringComponent("Current position")
-                        ).setColor("#dbd88e"),
-                        x,
-                        y
-                )
-        );
-        codeBlockWrappers.add(
-                new CodeBlockWrapper(
-                        new CodeBlockExpressionTest(
-                                new StringComponent("Current position")
-                        ).setColor("#a6b2c1"),
-                        x,
-                        y
-                )
-        );
+        for (int i = 0; i < 10; i++) {
+            codeBlockWrappers.add(
+                    new CodeBlockWrapper(
+                            new CodeBlockPosition(),
+                            20,
+                            20
+                    )
+            );
+        }
+        for (int i = 0; i < 10; i++) {
+            codeBlockWrappers.add(
+                    new CodeBlockWrapper(
+                            new CodeBlockMineArea(),
+                            30,
+                            30
+                    )
+            );
+        }
+        for (int i = 0; i < 10; i++) {
+            codeBlockWrappers.add(
+                    new CodeBlockWrapper(
+                            new CodeBlockMove(),
+                            40,
+                            40
+                    )
+            );
+        }
 
 
     }

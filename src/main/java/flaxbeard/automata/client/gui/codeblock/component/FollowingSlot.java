@@ -1,8 +1,8 @@
 package flaxbeard.automata.client.gui.codeblock.component;
 
 import flaxbeard.automata.client.gui.GuiProgrammer;
-import flaxbeard.automata.client.gui.codeblock.CodeBlock;
-import flaxbeard.automata.client.gui.codeblock.CodeBlockStatement;
+import flaxbeard.automata.client.gui.codeblock.base.CodeBlock;
+import flaxbeard.automata.client.gui.codeblock.base.CodeBlockStatement;
 
 public class FollowingSlot extends BlockSlot {
 
