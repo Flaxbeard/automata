@@ -1,11 +1,11 @@
 package flaxbeard.automata.client.gui.codeblock.component;
 
 import flaxbeard.automata.client.gui.GuiProgrammer;
-import flaxbeard.automata.client.gui.codeblock.CodeBlockInstance;
+import flaxbeard.automata.client.gui.codeblock.CodeBlock;
 
 public abstract class Component {
 
-    protected CodeBlockInstance block;
+    protected CodeBlock block;
 
     private int startX;
     private int startY;
@@ -17,11 +17,11 @@ public abstract class Component {
     public void drawForeground(GuiProgrammer gui) {}
     public void drawBackground(GuiProgrammer gui) {}
 
-    public void setBlock(CodeBlockInstance block) {
+    public void setBlock(CodeBlock block) {
         this.block = block;
     }
 
-    public CodeBlockInstance getBlock() {
+    public CodeBlock getBlock() {
         return block;
     }
 
@@ -61,6 +61,4 @@ public abstract class Component {
         return (x >= getStartX() && x <= getEndX())
                 && (y >= getStartY() && y <= getEndY());
     }
-
-    public abstract Component clone();
 }

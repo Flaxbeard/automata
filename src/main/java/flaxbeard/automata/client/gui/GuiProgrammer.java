@@ -28,12 +28,12 @@ public class GuiProgrammer extends GuiContainer {
 
     public static class CodeBlockWrapper {
 
-        private final CodeBlockInstance block;
+        private final CodeBlock block;
 
         private int x;
         private int y;
 
-        public CodeBlockWrapper(CodeBlockInstance block, int x, int y) {
+        public CodeBlockWrapper(CodeBlock block, int x, int y) {
             this.block = block;
             this.x = x;
             this.y = y;
@@ -77,7 +77,7 @@ public class GuiProgrammer extends GuiContainer {
             return (int) (block.getWidth() * BLOCK_SCALE);
         }
 
-        public CodeBlockInstance getBlock() {
+        public CodeBlock getBlock() {
             return block;
         }
     }
@@ -95,51 +95,88 @@ public class GuiProgrammer extends GuiContainer {
                 "Mine area"
         };
 
-        codeBlockWrappers.add(new CodeBlockWrapper(
-                new CodeBlockInstance(CodeBlocks.EXPR_ADD),
-                10,
-                10
-        ));
-        codeBlockWrappers.add(new CodeBlockWrapper(
-                new CodeBlockInstance(CodeBlocks.EXPR_ADD),
-                10,
-                10
-        ));
-        codeBlockWrappers.add(new CodeBlockWrapper(
-                new CodeBlockInstance(CodeBlocks.EXPR_CURR_POS),
-                10,
-                10
-        ));
-        codeBlockWrappers.add(new CodeBlockWrapper(
-                new CodeBlockInstance(CodeBlocks.EXPR_CURR_POS),
-                10,
-                10
-        ));
-        codeBlockWrappers.add(new CodeBlockWrapper(
-                new CodeBlockInstance(CodeBlocks.STMT_MINE),
-                10,
-                10
-        ));
-        codeBlockWrappers.add(new CodeBlockWrapper(
-                new CodeBlockInstance(CodeBlocks.STMT_MINE),
-                10,
-                10
-        ));
-        codeBlockWrappers.add(new CodeBlockWrapper(
-                new CodeBlockInstance(CodeBlocks.STMT_MOVE),
-                10,
-                10
-        ));
-        codeBlockWrappers.add(new CodeBlockWrapper(
-                new CodeBlockInstance(CodeBlocks.STMT_MOVE),
-                10,
-                10
-        ));
-        codeBlockWrappers.add(new CodeBlockWrapper(
-                new CodeBlockInstance(CodeBlocks.STMT_MOVE),
-                10,
-                10
-        ));
+        int x = 0;
+        int y = 0;
+
+        for (String str : texts) {
+            codeBlockWrappers.add(
+                    new CodeBlockWrapper(
+                            new CodeBlockStatementText(str),
+                            x,
+                            y
+                    )
+            );
+            x += 10;
+            y += 10;
+        }
+
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new ExpressionSlot(Type.STRING)
+                        ).setColor("#cea880"),
+                        x,
+                        y
+                )
+        );
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new ExpressionSlot(Type.STRING)
+                        ).setColor("#cea880"),
+                        x,
+                        y
+                )
+        );
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new ExpressionSlot(Type.STRING)
+                        ).setColor("#cea880"),
+                        x,
+                        y
+                )
+        );
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new StringComponent("[B]arshak")
+                        ).setColor("#cecece"),
+                        x,
+                        y
+                )
+        );
+
+
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new StringComponent("Current position")
+                        ).setColor("#cecece"),
+                        x,
+                        y
+                )
+        );
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new StringComponent("Current position")
+                        ).setColor("#dbd88e"),
+                        x,
+                        y
+                )
+        );
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new StringComponent("Current position")
+                        ).setColor("#a6b2c1"),
+                        x,
+                        y
+                )
+        );
+
+
     }
 
     @Override
@@ -210,7 +247,7 @@ public class GuiProgrammer extends GuiContainer {
             BlockSlot hoveredSlot = getHoveredSlot(draggingWrapper.getX(), draggingWrapper.getY() + draggingWrapper.getHeight() / 2);
             BlockSlot hoveredSlot2 = getHoveredSlot(draggingWrapper.getX(), draggingWrapper.getY());
 
-            CodeBlockInstance draggingBlock = draggingWrapper.getBlock();
+            CodeBlock draggingBlock = draggingWrapper.getBlock();
 
             if (tryToInsert(hoveredSlot, draggingBlock, mouseX, mouseY)
                     || tryToInsert(hoveredSlot2, draggingBlock, mouseX, mouseY)) {
@@ -222,40 +259,35 @@ public class GuiProgrammer extends GuiContainer {
         }
     }
 
-    private boolean tryToInsert(BlockSlot slot, CodeBlockInstance blockInstance, int x, int y) {
+    private boolean tryToInsert(BlockSlot slot, CodeBlock block, int x, int y) {
         if (slot == null) {
             return false;
         }
 
-        if (blockInstance.instanceOf(CodeBlockStatement.class)) {
-            // getBottomBlock takes a CodeBlockInstance<CodeBlockStatement>
-            getBottomBlock(blockInstance);
-        }
+        if (block instanceof CodeBlockStatement &&
+                slot.isBlockValid(block) && slot.getContents() != null) {
+            CodeBlockStatement bottomBlock = getBottomBlock((CodeBlockStatement) block);
 
-        if (blockInstance.instanceOf(CodeBlockStatement.class) &&
-                slot.isBlockValid(blockInstance) && slot.getContents() != null) {
-            CodeBlockInstance<CodeBlockStatement> bottomBlock = getBottomBlock(blockInstance);
-
-            CodeBlockInstance toMove = slot.getContents();
+            CodeBlock toMove = slot.getContents();
             slot.removeContents();
-            bottomBlock.getBlock().getFollowingSlot(bottomBlock).setContents(toMove);
+            bottomBlock.getFollowingSlot().setContents(toMove);
             toMove.recalculateComponentPositions();
         }
-        else if (slot.isBlockValid(blockInstance) && slot.getContents() != null) {
+        else if (slot.isBlockValid(block) && slot.getContents() != null) {
             removeBlockFromParent(x, y, slot.getContents());
         }
-        if (slot.setContents(blockInstance)) {
+        if (slot.setContents(block)) {
             return true;
         }
         return false;
     }
 
-    private CodeBlockInstance<CodeBlockStatement> getBottomBlock(CodeBlockInstance<CodeBlockStatement> blockInstance) {
-        CodeBlockInstance next = blockInstance.getBlock().getFollowingSlot(blockInstance).getContents();
+    private CodeBlockStatement getBottomBlock(CodeBlockStatement block) {
+        CodeBlockStatement next = (CodeBlockStatement) block.getFollowingSlot().getContents();
         if (next != null) {
             return getBottomBlock(next);
         }
-        return blockInstance;
+        return block;
     }
 
     private BlockSlot getHoveredSlot(int mouseX, int mouseY) {
@@ -285,7 +317,7 @@ public class GuiProgrammer extends GuiContainer {
                     && (mouseY >= codeBlockWrapper.getY() && mouseY <= codeBlockWrapper.getY() + codeBlockWrapper.getHeight());
 
             if (hovering) {
-                CodeBlockInstance hoveredBlock = codeBlockWrapper.getBlock().getHoveredBlock(
+                CodeBlock hoveredBlock = codeBlockWrapper.getBlock().getHoveredBlock(
                         (int) ((mouseX - codeBlockWrapper.getX()) / BLOCK_SCALE),
                         (int) ((mouseY - codeBlockWrapper.getY()) / BLOCK_SCALE)
                 );
@@ -305,7 +337,7 @@ public class GuiProgrammer extends GuiContainer {
         return null;
     }
 
-    private CodeBlockWrapper removeBlockFromParent(int x, int y, CodeBlockInstance block) {
+    private CodeBlockWrapper removeBlockFromParent(int x, int y, CodeBlock block) {
         CodeBlockWrapper newPos = new CodeBlockWrapper(block, x, y);
         block.removeFromParent();
         codeBlockWrappers.add(newPos);

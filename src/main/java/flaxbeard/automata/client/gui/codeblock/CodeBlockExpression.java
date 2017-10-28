@@ -8,5 +8,5 @@ public abstract class CodeBlockExpression extends CodeBlock {
         super(components);
     }
 
-    public abstract boolean canTakeType(CodeBlockInstance codeBlockInstance, Type type);
+    public abstract boolean canTakeType(Type type);
 }

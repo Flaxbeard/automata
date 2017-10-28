@@ -9,7 +9,7 @@ public class CodeBlockExpressionTest extends CodeBlockExpression {
     }
 
     @Override
-    public boolean canTakeType(CodeBlockInstance codeBlockInstance, Type type) {
+    public boolean canTakeType(Type type) {
         return true;
     }
 }

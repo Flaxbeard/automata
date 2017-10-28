@@ -6,7 +6,7 @@ import net.minecraft.client.gui.FontRenderer;
 
 public class StringComponent extends Component {
     private static FontRenderer font = Minecraft.getMinecraft().fontRenderer;
-    public final String text;
+    public String text;
 
     public StringComponent(String text) {
         this.text = text;
@@ -25,10 +25,5 @@ public class StringComponent extends Component {
     @Override
     public void drawForeground(GuiProgrammer gui) {
         font.drawString(text, 2, 1, 0);
-    }
-
-    @Override
-    public Component clone() {
-        return new StringComponent(text);
     }
 }

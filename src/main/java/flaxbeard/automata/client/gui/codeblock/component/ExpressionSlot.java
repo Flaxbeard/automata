@@ -1,6 +1,6 @@
 package flaxbeard.automata.client.gui.codeblock.component;
 
-import flaxbeard.automata.client.gui.codeblock.CodeBlockInstance;
+import flaxbeard.automata.client.gui.codeblock.CodeBlock;
 import flaxbeard.automata.client.gui.codeblock.CodeBlockExpression;
 import flaxbeard.automata.client.gui.codeblock.Type;
 
@@ -13,15 +13,10 @@ public class ExpressionSlot extends BlockSlot {
     }
     
     @Override
-    public boolean isBlockValid(CodeBlockInstance blockInstance) {
-        if (blockInstance.getBlock() instanceof CodeBlockExpression) {
-            return ((CodeBlockExpression) blockInstance.getBlock()).canTakeType(blockInstance, type);
+    public boolean isBlockValid(CodeBlock block) {
+        if (block instanceof CodeBlockExpression) {
+            return ((CodeBlockExpression) block).canTakeType(type);
         }
         return false;
-    }
-
-    @Override
-    public Component clone() {
-        return new ExpressionSlot(type);
     }
 }

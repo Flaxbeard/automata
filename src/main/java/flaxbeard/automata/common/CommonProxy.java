@@ -1,7 +1,6 @@
 package flaxbeard.automata.common;
 
 import flaxbeard.automata.Automata;
-import flaxbeard.automata.client.gui.codeblock.CodeBlocks;
 import flaxbeard.automata.common.handler.GuiHandler;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -25,7 +24,6 @@ public class CommonProxy
 
 	public void postInit()
 	{
-		CodeBlocks.preInit();
 
 	}
 
