@@ -1,5 +1,6 @@
 package flaxbeard.automata.client.gui.codeblock;
 
+
 import flaxbeard.automata.Automata;
 import flaxbeard.automata.client.gui.GuiProgrammer;
 import flaxbeard.automata.client.gui.codeblock.component.BlockSlot;
@@ -9,107 +10,79 @@ import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
 
-public abstract class CodeBlock {
-
-    private static final ResourceLocation WHITE_PX =
-            new ResourceLocation(Automata.MODID + ":textures/gui/whitepx.png");
+public class CodeBlock {
 
     protected static final ResourceLocation METAL_TEXTURE =
             new ResourceLocation(Automata.MODID + ":textures/gui/metal2.png");
 
-    protected final Component[] components;
-    protected BlockSlot[] slots;
-    protected BlockSlot slotIn;
-
-    protected int height;
-    protected int width;
-    protected int renderHeight;
-    protected int renderWidth;
-
-    protected float[] color;
+    private Component[] components;
 
     public CodeBlock(Component... components) {
         this.components = components;
+        CodeBlocks.codeBlockList.add(this);
+    }
 
-        int slotCount = 0;
-        for (Component component : components) {
-            component.setBlock(this);
-            if (component instanceof BlockSlot) {
-                slotCount++;
-            }
+    public Component[] getInstanceComponents() {
+        Component[] newComponents = new Component[components.length];
+        for (int i = 0; i < components.length; i++) {
+            newComponents[i] = components[i].clone();
         }
-
-        slots = new BlockSlot[slotCount];
-
-        int i = 0;
-        for (Component component : components) {
-            if (component instanceof BlockSlot) {
-                slots[i] = (BlockSlot) component;
-                i++;
-            }
-        }
-
-        recalculateComponentPositions();
-
-        color = new float[3];
-        setColor("#dbc98e");
+        return newComponents;
     }
 
-    public CodeBlock setColor(String hex) {
-        Color c = Color.decode(hex);
-        color[0] = c.getRed() / 255.f;
-        color[1] = c.getGreen() / 255.f;
-        color[2] = c.getBlue() / 255.f;
-        return this;
-    }
-
-    public void removeFromParent() {
-        if (slotIn != null) {
-            slotIn.removeContents();
-        }
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public int getRenderWidth() {
-        return renderWidth;
-    }
-
-    public int getRenderHeight() {
-        return renderHeight;
-    }
-
-    public void drawBackground(GuiProgrammer gui) {
-
+    public void drawBackground(CodeBlockInstance codeBlockInstance, GuiProgrammer gui) {
         GlStateManager.pushMatrix();
-        drawBlockShape(gui);
+        drawBlockShape(codeBlockInstance, gui);
+
         GlStateManager.popMatrix();
+        GlStateManager.pushMatrix();
 
-        for (Component component : components) {
+        for (Component component : codeBlockInstance.getComponents()) {
             drawComponentBackground(gui, component);
-
         }
 
         GlStateManager.popMatrix();
     }
 
-    protected void drawBlockShape(GuiProgrammer gui) {
-        int width = getRenderWidth();
-        int height = getRenderHeight();
+
+    protected void drawComponentBackground(GuiProgrammer gui, Component component) {
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(component.getStartX(), component.getStartY(), 0);
+        component.drawBackground(gui);
+        GlStateManager.popMatrix();
+    }
+
+    public void drawForeground(CodeBlockInstance codeBlockInstance, GuiProgrammer gui) {
+        GlStateManager.pushMatrix();
+
+        for (Component component : codeBlockInstance.getComponents()) {
+            drawComponentForeground(gui, component);
+        }
+
+        GlStateManager.popMatrix();
+    }
+
+
+    protected void drawComponentForeground(GuiProgrammer gui, Component component) {
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(component.getStartX(), component.getStartY(), 0);
+        component.drawForeground(gui);
+        GlStateManager.popMatrix();
+    }
+
+    protected void drawBlockShape(CodeBlockInstance codeBlockInstance, GuiProgrammer gui) {
+        int width = codeBlockInstance.getRenderWidth();
+        int height = codeBlockInstance.getRenderHeight();
 
         gui.mc.getTextureManager().bindTexture(METAL_TEXTURE);
 
         GlStateManager.pushMatrix();
+        
+        float[] color = getColor(codeBlockInstance);
         GlStateManager.color(color[0], color[1], color[2]);
 
 
-        int leftEdgeWidth = drawLeftEdge(gui);
+        int leftEdgeWidth = drawLeftEdge(codeBlockInstance, gui);
         int widthLeft = width - leftEdgeWidth;
         int loc = leftEdgeWidth;
         int amnt = 81;
@@ -120,20 +93,40 @@ public abstract class CodeBlock {
             widthLeft -= amnt;
             loc += amnt;
         }
-        int rightEdgeWidth = drawRightEdge(gui);
+        int rightEdgeWidth = drawRightEdge(codeBlockInstance, gui);
         if (widthLeft > rightEdgeWidth) {
             gui.drawTexturedModalRect(loc, 0, 15, 0, widthLeft - rightEdgeWidth, height - 2);
             gui.drawTexturedModalRect(loc, height - 2, 15, 98, widthLeft - rightEdgeWidth, 2);
         }
+
+        GlStateManager.popMatrix();
     }
 
-    protected int drawLeftEdge(GuiProgrammer gui) {
+    protected int drawRightEdge(CodeBlockInstance codeBlockInstance, GuiProgrammer gui) {
+        /*gui.drawTexturedModalRect(getRenderWidth() - 2, 0, 98, 0, 2, getRenderHeight());
+        gui.drawTexturedModalRect(getRenderWidth() - 2, getRenderHeight() - 2, 98, 98, 2, 2);
+        return 2;*/
+        for (int i = 1; i < codeBlockInstance.getRenderHeight() - 1; i++) {
+            float percentage = i / (codeBlockInstance.getRenderHeight() - 1.0f);
+            int type = (int) (percentage * 10);
+
+            if (type < 5) {
+                gui.drawTexturedModalRect(codeBlockInstance.getRenderWidth() - 5, i, 1, type, 4, 1);
+            } else {
+                gui.drawTexturedModalRect(codeBlockInstance.getRenderWidth() - 5, i, 6, (type - 5) + 99, 4, 1);
+            }
+        }
+
+        return 5;
+    }
+
+    protected int drawLeftEdge(CodeBlockInstance codeBlockInstance, GuiProgrammer gui) {
         /*gui.drawTexturedModalRect(0, 0, 102, 0, 2, getRenderHeight() - 2);
         gui.drawTexturedModalRect(0, getRenderHeight() - 2, 102, 98, 2, 2);
         return 2;*/
 
-        for (int i = 1; i < getRenderHeight() - 1; i++) {
-            float percentage = i / (getRenderHeight() - 1.0f);
+        for (int i = 1; i < codeBlockInstance.getRenderHeight() - 1; i++) {
+            float percentage = i / (codeBlockInstance.getRenderHeight() - 1.0f);
             int type = (int) (percentage * 10);
 
             if (type < 5) {
@@ -146,60 +139,26 @@ public abstract class CodeBlock {
         return 5;
     }
 
-    protected int drawRightEdge(GuiProgrammer gui) {
-        /*gui.drawTexturedModalRect(getRenderWidth() - 2, 0, 98, 0, 2, getRenderHeight());
-        gui.drawTexturedModalRect(getRenderWidth() - 2, getRenderHeight() - 2, 98, 98, 2, 2);
-        return 2;*/
-        for (int i = 1; i < getRenderHeight() - 1; i++) {
-            float percentage = i / (getRenderHeight() - 1.0f);
-            int type = (int) (percentage * 10);
-
-            if (type < 5) {
-                gui.drawTexturedModalRect(getRenderWidth() - 5, i, 1, type, 4, 1);
-            } else {
-                gui.drawTexturedModalRect(getRenderWidth() - 5, i, 6, (type - 5) + 99, 4, 1);
-            }
-        }
-
-        return 5;
+    private float[] getColor(CodeBlockInstance codeBlockInstance) {
+        float[] color = new float[3];
+        Color c = Color.decode("#dbc98e");
+        color[0] = c.getRed() / 255.f;
+        color[1] = c.getGreen() / 255.f;
+        color[2] = c.getBlue() / 255.f;
+        return color;
     }
 
-    public void drawForeground(GuiProgrammer gui) {
-
-        GlStateManager.pushMatrix();
-
-        for (Component component : components) {
-            drawComponentForeground(gui, component);
-        }
-
-        GlStateManager.popMatrix();
-    }
-
-    protected void drawComponentForeground(GuiProgrammer gui, Component component) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(component.getStartX(), component.getStartY(), 0);
-        component.drawForeground(gui);
-        GlStateManager.popMatrix();
-    }
-
-    protected void drawComponentBackground(GuiProgrammer gui, Component component) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(component.getStartX(), component.getStartY(), 0);
-        component.drawBackground(gui);
-        GlStateManager.popMatrix();
-    }
-
-    public CodeBlock getHoveredBlock(int x, int y) {
-        BlockSlot hoveredSlot = getHoveredSlot(x, y);
+    public CodeBlockInstance getHoveredBlock(CodeBlockInstance codeBlockInstance, int x, int y) {
+        BlockSlot hoveredSlot = getHoveredSlot(codeBlockInstance, x, y);
         if (hoveredSlot != null && hoveredSlot.getContents() != null) {
             return hoveredSlot.getContents();
         }
-        return this;
+        return codeBlockInstance;
     }
 
-    public BlockSlot getHoveredSlot(int x, int y) {
+    public BlockSlot getHoveredSlot(CodeBlockInstance codeBlockInstance, int x, int y) {
 
-        for (BlockSlot slot : slots) {
+        for (BlockSlot slot : codeBlockInstance.getSlots()) {
             BlockSlot result = getHoveredSlotHelper(slot, x, y);
             if (result != null) {
                 return result;
@@ -211,7 +170,7 @@ public abstract class CodeBlock {
 
     protected BlockSlot getHoveredSlotHelper(BlockSlot slot, int x, int y) {
         if (slot.isWithinBounds(x, y)) {
-            CodeBlock child = slot.getContents();
+            CodeBlockInstance child = slot.getContents();
             if (child != null) {
                 BlockSlot lowerSlot = child.getHoveredSlot(x - slot.getStartX(), y - slot.getStartY());
                 if (lowerSlot != null) {
@@ -223,20 +182,21 @@ public abstract class CodeBlock {
         return null;
     }
 
-
-
-    public void recalculateComponentPositions() {
-        renderHeight = 0;
-        height = 0;
-        for (Component component : components) {
+    public void recalculateComponentPositions(CodeBlockInstance codeBlockInstance) {
+        int renderHeight = 0;
+        int height = 0;
+        for (Component component : codeBlockInstance.getComponents()) {
             renderHeight = Math.max(renderHeight, component.getHeight());
         }
         renderHeight += 4;
         height += renderHeight;
 
-        width = getLeftPadding();
+        codeBlockInstance.setHeight(height);
+        codeBlockInstance.setRenderHeight(renderHeight);
 
-        for (Component component : components) {
+        int width = getLeftPadding(codeBlockInstance);
+
+        for (Component component : codeBlockInstance.getComponents()) {
             int ch = component.getHeight();
             int cw = component.getWidth();
 
@@ -249,76 +209,23 @@ public abstract class CodeBlock {
 
             width += cw;
         }
-        width += getRightPadding();
-        renderWidth = width;
+        width += getRightPadding(codeBlockInstance);
 
-        if (hasParent()) {
-            getParent().recalculateComponentPositions();
+        codeBlockInstance.setWidth(width);
+        codeBlockInstance.setRenderWidth(width);
+
+        if (codeBlockInstance.hasParent()) {
+            codeBlockInstance.getParent().recalculateComponentPositions();
         }
     }
 
-    protected int getLeftPadding() {
+    protected int getLeftPadding(CodeBlockInstance codeBlockInstance) {
         return 3;
     }
 
-    protected int getRightPadding() {
+    protected int getRightPadding(CodeBlockInstance codeBlockInstance) {
         return 3;
     }
 
-    public int getAbsoluteX() {
-        if (slotIn == null) {
-            return 0;
-        }
-        return slotIn.getStartX() + getParent().getAbsoluteX();
-    }
-
-    public int getAbsoluteY() {
-        if (slotIn == null) {
-            return 0;
-        }
-        return slotIn.getStartY() + getParent().getAbsoluteY();
-    }
-
-    public boolean hasParent() {
-        return slotIn != null;
-    }
-
-    public CodeBlock getParent() {
-        if (hasParent()) {
-            return slotIn.getBlock();
-        }
-        return null;
-    }
-
-    public void setSlotIn(BlockSlot slotIn) {
-        this.slotIn = slotIn;
-    }
-
-
-   /* public static class FollowingComponent extends SlotComponent {
-        @Override
-        public int getWidth(CodeBlock block, CodeBlock child) {
-            if (child == null) {
-                return 50;
-            }
-            return child.getWidth();
-        }
-
-        @Override
-        public int getHeight(CodeBlock block, CodeBlock child) {
-            if (child == null) {
-                return 5;
-            }
-            return child.getHeight();
-        }
-
-        @Override
-        public void drawBackground(GuiProgrammer gui, CodeBlock block, CodeBlock child) {
-            if (child != null) {
-                child.drawBackground(gui);
-            }
-        }
-
-    }*/
-
+    public void setup(CodeBlockInstance codeBlockInstance) {}
 }

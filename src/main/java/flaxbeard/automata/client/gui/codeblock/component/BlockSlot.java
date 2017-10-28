@@ -2,7 +2,7 @@ package flaxbeard.automata.client.gui.codeblock.component;
 
 import flaxbeard.automata.Automata;
 import flaxbeard.automata.client.gui.GuiProgrammer;
-import flaxbeard.automata.client.gui.codeblock.CodeBlock;
+import flaxbeard.automata.client.gui.codeblock.CodeBlockInstance;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
@@ -11,10 +11,10 @@ public abstract class BlockSlot extends Component {
     private static final ResourceLocation WHITE_PX =
             new ResourceLocation(Automata.MODID + ":textures/gui/whitepx.png");
 
-    protected CodeBlock contents;
+    protected CodeBlockInstance contents;
     protected boolean hovered = false;
 
-    public CodeBlock getContents() {
+    public CodeBlockInstance getContents() {
         return contents;
     }
 
@@ -26,9 +26,9 @@ public abstract class BlockSlot extends Component {
         }
     }
 
-    public abstract boolean isBlockValid(CodeBlock block);
+    public abstract boolean isBlockValid(CodeBlockInstance block);
 
-    public boolean setContents(CodeBlock newContents) {
+    public boolean setContents(CodeBlockInstance newContents) {
         if (newContents == block || (newContents != null && newContents.hasParent())) {
             //System.out.println("RE");
             return false;
@@ -109,4 +109,5 @@ public abstract class BlockSlot extends Component {
     public void setHovered() {
         hovered = true;
     }
+
 }

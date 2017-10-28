@@ -1,14 +1,14 @@
 package flaxbeard.automata.client.gui.codeblock.component;
 
 import flaxbeard.automata.client.gui.GuiProgrammer;
-import flaxbeard.automata.client.gui.codeblock.CodeBlock;
+import flaxbeard.automata.client.gui.codeblock.CodeBlockInstance;
 import flaxbeard.automata.client.gui.codeblock.CodeBlockStatement;
 
 public class FollowingSlot extends BlockSlot {
 
     @Override
-    public boolean isBlockValid(CodeBlock block) {
-        return block instanceof CodeBlockStatement;
+    public boolean isBlockValid(CodeBlockInstance block) {
+        return block.getBlock() instanceof CodeBlockStatement;
     }
 
     @Override
@@ -32,6 +32,11 @@ public class FollowingSlot extends BlockSlot {
             return 9;
         }
         return contents.getHeight();
+    }
+
+    @Override
+    public Component clone() {
+        return new FollowingSlot();
     }
 
 }
