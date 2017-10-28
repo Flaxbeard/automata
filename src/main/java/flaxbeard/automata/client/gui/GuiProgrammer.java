@@ -1,6 +1,10 @@
 package flaxbeard.automata.client.gui;
 
 import flaxbeard.automata.Automata;
+import flaxbeard.automata.client.gui.codeblock.*;
+import flaxbeard.automata.client.gui.codeblock.component.BlockSlot;
+import flaxbeard.automata.client.gui.codeblock.component.ExpressionSlot;
+import flaxbeard.automata.client.gui.codeblock.component.StringComponent;
 import flaxbeard.automata.common.block.tile.TileEntityProgrammer;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -20,16 +24,16 @@ public class GuiProgrammer extends GuiContainer {
             new ResourceLocation(Automata.MODID + ":textures/gui/programmer.png");
 
     private final TileEntityProgrammer programmer;
-    private List<CodeBlockPosition> codeBlockPositions;
+    private List<CodeBlockWrapper> codeBlockWrappers;
 
-    public static class CodeBlockPosition {
+    public static class CodeBlockWrapper {
 
         private final CodeBlock block;
 
         private int x;
         private int y;
 
-        public CodeBlockPosition(CodeBlock block, int x, int y) {
+        public CodeBlockWrapper(CodeBlock block, int x, int y) {
             this.block = block;
             this.x = x;
             this.y = y;
@@ -59,7 +63,7 @@ public class GuiProgrammer extends GuiContainer {
             return y;
         }
 
-        public CodeBlockPosition setPos(int x, int y) {
+        public CodeBlockWrapper setPos(int x, int y) {
             this.x = x;
             this.y = y;
             return this;
@@ -83,17 +87,94 @@ public class GuiProgrammer extends GuiContainer {
         this.programmer = programmer;
         this.ySize = 114 + 6 * 18;
 
-        codeBlockPositions = new ArrayList<>();
+        codeBlockWrappers = new ArrayList<>();
 
-        for (int i = 0; i < 10; i++) {
-            codeBlockPositions.add(
-                    new CodeBlockPosition(
-                            new CodeBlockText("Number " + i),
-                            i * 2,
-                            i * 3
+        String[] texts = {
+                "Go to position",
+                "Attack",
+                "Mine area"
+        };
+
+        int x = 0;
+        int y = 0;
+
+        for (String str : texts) {
+            codeBlockWrappers.add(
+                    new CodeBlockWrapper(
+                            new CodeBlockStatementText(str),
+                            x,
+                            y
                     )
             );
+            x += 10;
+            y += 10;
         }
+
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new ExpressionSlot(Type.STRING)
+                        ).setColor("#cea880"),
+                        x,
+                        y
+                )
+        );
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new ExpressionSlot(Type.STRING)
+                        ).setColor("#cea880"),
+                        x,
+                        y
+                )
+        );
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new ExpressionSlot(Type.STRING)
+                        ).setColor("#cea880"),
+                        x,
+                        y
+                )
+        );
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new StringComponent("[B]arshak")
+                        ).setColor("#cecece"),
+                        x,
+                        y
+                )
+        );
+
+
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new StringComponent("Current position")
+                        ).setColor("#cecece"),
+                        x,
+                        y
+                )
+        );
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new StringComponent("Current position")
+                        ).setColor("#dbd88e"),
+                        x,
+                        y
+                )
+        );
+        codeBlockWrappers.add(
+                new CodeBlockWrapper(
+                        new CodeBlockExpressionTest(
+                                new StringComponent("Current position")
+                        ).setColor("#a6b2c1"),
+                        x,
+                        y
+                )
+        );
 
 
     }
@@ -114,20 +195,20 @@ public class GuiProgrammer extends GuiContainer {
         super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 
 
-        for (CodeBlockPosition block : codeBlockPositions) {
+        for (CodeBlockWrapper block : codeBlockWrappers) {
             block.drawBackground(this);
             block.drawForeground(this);
             RenderHelper.disableStandardItemLighting();
         }
 
-        if (draggingBlockPos != null) {
-            draggingBlockPos.drawBackground(this);
-            draggingBlockPos.drawForeground(this);
+        if (draggingWrapper != null) {
+            draggingWrapper.drawBackground(this);
+            draggingWrapper.drawForeground(this);
         }
     }
 
     private boolean isDragging = false;
-    private CodeBlockPosition draggingBlockPos = null;
+    private CodeBlockWrapper draggingWrapper = null;
 
     private int offsetX = 0;
     private int offsetY = 0;
@@ -136,96 +217,130 @@ public class GuiProgrammer extends GuiContainer {
 
         if (mouseDown) {
             if (!isDragging) {
-                CodeBlockPosition hoveredBlock = getHoveredBlock(mouseX, mouseY);
+                CodeBlockWrapper hoveredBlock = getHoveredBlock(mouseX, mouseY);
                 if (hoveredBlock != null) {
                     isDragging = true;
-                    draggingBlockPos = hoveredBlock;
+                    draggingWrapper = hoveredBlock;
                     offsetX = mouseX - hoveredBlock.getX();
                     offsetY = mouseY - hoveredBlock.getY();
                 }
             }
             if (isDragging) {
                 int posX = Math.max(mouseX - offsetX, -99992);
-                //posX = Math.min(posX, xSize - draggingBlockPos.getWidth() - 3);
+                //posX = Math.min(posX, xSize - draggingWrapper.getWidth() - 3);
                 int posY = Math.max(mouseY - offsetY, -99992);
-                //posY = Math.min(posY, 128 - draggingBlockPos.getHeight() - 3);
+                //posY = Math.min(posY, 128 - draggingWrapper.getHeight() - 3);
 
-                draggingBlockPos.setPos(posX, posY);
+                draggingWrapper.setPos(posX, posY);
+
+                BlockSlot hoveredSlot = getHoveredSlot(draggingWrapper.getX(), draggingWrapper.getY() + draggingWrapper.getHeight() / 2);
+                if (hoveredSlot != null && hoveredSlot.isBlockValid(draggingWrapper.getBlock())) {
+                    hoveredSlot.setHovered();
+                }
             }
         } else if (isDragging) {
 
-            CodeBlock.BlockSlot hoveredSlot = getHoveredSlot(mouseX, mouseY);
-            CodeBlock.BlockSlot hoveredSlot2 = getHoveredSlot(draggingBlockPos.getX(), draggingBlockPos.getY());
+            codeBlockWrappers.remove(draggingWrapper);
+            codeBlockWrappers.add(draggingWrapper);
 
-            if (hoveredSlot != null) {
-                if (hoveredSlot.getContents() != null) {
-                    removeBlockFromParent(mouseX, mouseY, hoveredSlot.getContents());
-                }
-                if (hoveredSlot.setContents(draggingBlockPos.getBlock())) {
-                    codeBlockPositions.remove(draggingBlockPos);
-                }
-            } else if (hoveredSlot2 != null) {
-                if (hoveredSlot2.getContents() != null) {
-                    removeBlockFromParent(mouseX, mouseY, hoveredSlot2.getContents());
-                }
-                if (hoveredSlot2.setContents(draggingBlockPos.getBlock())) {
-                    codeBlockPositions.remove(draggingBlockPos);
-                }
+            //BlockSlot hoveredSlot = getHoveredSlot(mouseX, mouseY);
+            BlockSlot hoveredSlot = getHoveredSlot(draggingWrapper.getX(), draggingWrapper.getY() + draggingWrapper.getHeight() / 2);
+            BlockSlot hoveredSlot2 = getHoveredSlot(draggingWrapper.getX(), draggingWrapper.getY());
+
+            CodeBlock draggingBlock = draggingWrapper.getBlock();
+
+            if (tryToInsert(hoveredSlot, draggingBlock, mouseX, mouseY)
+                    || tryToInsert(hoveredSlot2, draggingBlock, mouseX, mouseY)) {
+                codeBlockWrappers.remove(draggingWrapper);
             }
 
             isDragging = false;
-            draggingBlockPos = null;
+            draggingWrapper = null;
         }
     }
 
-    private CodeBlock.BlockSlot getHoveredSlot(int mouseX, int mouseY) {
-        for (CodeBlockPosition blockPos : codeBlockPositions) {
-            if (blockPos == draggingBlockPos) continue;
+    private boolean tryToInsert(BlockSlot slot, CodeBlock block, int x, int y) {
+        if (slot == null) {
+            return false;
+        }
 
-            boolean hovering = (mouseX >= blockPos.getX() && mouseX <= blockPos.getX() + blockPos.getWidth())
-                    && (mouseY >= blockPos.getY() && mouseY <= blockPos.getY() + blockPos.getHeight());
+        if (block instanceof CodeBlockStatement &&
+                slot.isBlockValid(block) && slot.getContents() != null) {
+            CodeBlockStatement bottomBlock = getBottomBlock((CodeBlockStatement) block);
+
+            CodeBlock toMove = slot.getContents();
+            slot.removeContents();
+            bottomBlock.getFollowingSlot().setContents(toMove);
+            toMove.recalculateComponentPositions();
+        }
+        else if (slot.isBlockValid(block) && slot.getContents() != null) {
+            removeBlockFromParent(x, y, slot.getContents());
+        }
+        if (slot.setContents(block)) {
+            return true;
+        }
+        return false;
+    }
+
+    private CodeBlockStatement getBottomBlock(CodeBlockStatement block) {
+        CodeBlockStatement next = (CodeBlockStatement) block.getFollowingSlot().getContents();
+        if (next != null) {
+            return getBottomBlock(next);
+        }
+        return block;
+    }
+
+    private BlockSlot getHoveredSlot(int mouseX, int mouseY) {
+        for (int i = codeBlockWrappers.size() - 1; i >= 0; i--) {
+            CodeBlockWrapper codeBlockWrapper = codeBlockWrappers.get(i);
+
+            if (codeBlockWrapper == draggingWrapper) continue;
+
+            boolean hovering = (mouseX >= codeBlockWrapper.getX() && mouseX <= codeBlockWrapper.getX() + codeBlockWrapper.getWidth())
+                    && (mouseY >= codeBlockWrapper.getY() && mouseY <= codeBlockWrapper.getY() + codeBlockWrapper.getHeight());
 
             if (hovering) {
-                return blockPos.getBlock().getHoveredSlot(
-                        (int) ((mouseX - blockPos.getX()) / BLOCK_SCALE),
-                        (int) ((mouseY - blockPos.getY()) / BLOCK_SCALE)
+                return codeBlockWrapper.getBlock().getHoveredSlot(
+                        (int) ((mouseX - codeBlockWrapper.getX()) / BLOCK_SCALE),
+                        (int) ((mouseY - codeBlockWrapper.getY()) / BLOCK_SCALE)
                 );
             }
         }
         return null;
     }
 
-    private CodeBlockPosition getHoveredBlock(int mouseX, int mouseY) {
-        for (CodeBlockPosition blockPos : codeBlockPositions) {
+    private CodeBlockWrapper getHoveredBlock(int mouseX, int mouseY) {
+        for (int i = codeBlockWrappers.size() - 1; i >= 0; i--) {
+            CodeBlockWrapper codeBlockWrapper = codeBlockWrappers.get(i);
 
-            boolean hovering = (mouseX >= blockPos.getX() && mouseX <= blockPos.getX() + blockPos.getWidth())
-                    && (mouseY >= blockPos.getY() && mouseY <= blockPos.getY() + blockPos.getHeight());
+            boolean hovering = (mouseX >= codeBlockWrapper.getX() && mouseX <= codeBlockWrapper.getX() + codeBlockWrapper.getWidth())
+                    && (mouseY >= codeBlockWrapper.getY() && mouseY <= codeBlockWrapper.getY() + codeBlockWrapper.getHeight());
 
             if (hovering) {
-                CodeBlock hoveredBlock = blockPos.getBlock().getHoveredBlock(
-                        (int) ((mouseX - blockPos.getX()) / BLOCK_SCALE),
-                        (int) ((mouseY - blockPos.getY()) / BLOCK_SCALE)
+                CodeBlock hoveredBlock = codeBlockWrapper.getBlock().getHoveredBlock(
+                        (int) ((mouseX - codeBlockWrapper.getX()) / BLOCK_SCALE),
+                        (int) ((mouseY - codeBlockWrapper.getY()) / BLOCK_SCALE)
                 );
                 if (hoveredBlock.hasParent()) {
                     int x = hoveredBlock.getAbsoluteX();
                     int y = hoveredBlock.getAbsoluteY();
 
-                    x = (int) (x * BLOCK_SCALE) + blockPos.getX();
-                    y = (int) (y * BLOCK_SCALE) + blockPos.getY();
+                    x = (int) (x * BLOCK_SCALE) + codeBlockWrapper.getX();
+                    y = (int) (y * BLOCK_SCALE) + codeBlockWrapper.getY();
 
                     return removeBlockFromParent(x, y, hoveredBlock);
                 } else {
-                    return blockPos;
+                    return codeBlockWrapper;
                 }
             }
         }
         return null;
     }
 
-    private CodeBlockPosition removeBlockFromParent(int x, int y, CodeBlock block) {
-        CodeBlockPosition newPos = new CodeBlockPosition(block, x, y);
+    private CodeBlockWrapper removeBlockFromParent(int x, int y, CodeBlock block) {
+        CodeBlockWrapper newPos = new CodeBlockWrapper(block, x, y);
         block.removeFromParent();
-        codeBlockPositions.add(newPos);
+        codeBlockWrappers.add(newPos);
         return newPos;
     }
 }
