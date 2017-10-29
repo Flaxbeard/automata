@@ -2,6 +2,7 @@ package flaxbeard.automata.common;
 
 import flaxbeard.automata.Automata;
 import flaxbeard.automata.common.handler.GuiHandler;
+import flaxbeard.automata.common.network.PacketHandler;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.event.RegistryEvent;
@@ -15,6 +16,7 @@ public class CommonProxy
 	public void preInit()
 	{
 		CyberwareContent.preInit();
+		PacketHandler.preInit();
 	}
 
 	public void init()

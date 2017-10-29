@@ -1,7 +1,7 @@
-package flaxbeard.automata.client.gui.codeblock.base;
+package flaxbeard.automata.common.codeblock.base;
 
-import flaxbeard.automata.client.gui.codeblock.Type;
-import flaxbeard.automata.client.gui.codeblock.component.Component;
+import flaxbeard.automata.common.codeblock.Type;
+import flaxbeard.automata.common.codeblock.component.Component;
 
 public abstract class CodeBlockExpression extends CodeBlock {
 

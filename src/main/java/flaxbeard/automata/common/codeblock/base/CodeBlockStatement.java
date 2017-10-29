@@ -1,9 +1,11 @@
-package flaxbeard.automata.client.gui.codeblock.base;
+package flaxbeard.automata.common.codeblock.base;
 
 import flaxbeard.automata.client.gui.GuiProgrammer;
-import flaxbeard.automata.client.gui.codeblock.component.BlockSlot;
-import flaxbeard.automata.client.gui.codeblock.component.Component;
-import flaxbeard.automata.client.gui.codeblock.component.FollowingSlot;
+import flaxbeard.automata.common.codeblock.CodeBlockRegistry;
+import flaxbeard.automata.common.codeblock.component.BlockSlot;
+import flaxbeard.automata.common.codeblock.component.Component;
+import flaxbeard.automata.common.codeblock.component.FollowingSlot;
+import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class CodeBlockStatement extends CodeBlock {
 
@@ -78,5 +80,26 @@ public abstract class CodeBlockStatement extends CodeBlock {
 
     public FollowingSlot getFollowingSlot() {
         return followingSlot;
+    }
+
+    @Override
+    protected NBTTagCompound saveData(NBTTagCompound compound) {
+        compound = super.saveData(compound);
+
+        NBTTagCompound followingSlotTag = new NBTTagCompound();
+        if (followingSlot.getContents() != null) {
+            followingSlot.getContents().writeToNBT(followingSlotTag);
+        }
+        compound.setTag("followingSlot", followingSlotTag);
+
+        return compound;
+    }
+
+    @Override
+    protected void loadData(NBTTagCompound compound) {
+        super.loadData(compound);
+
+        NBTTagCompound followingSlotTag = compound.getCompoundTag("followingSlot");
+        followingSlot.setContents(CodeBlockRegistry.loadFromNBT(followingSlotTag));
     }
 }

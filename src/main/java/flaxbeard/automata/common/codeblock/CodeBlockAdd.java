@@ -1,9 +1,9 @@
-package flaxbeard.automata.client.gui.codeblock;
+package flaxbeard.automata.common.codeblock;
 
 import flaxbeard.automata.Automata;
-import flaxbeard.automata.client.gui.codeblock.base.CodeBlockExpression;
-import flaxbeard.automata.client.gui.codeblock.component.ExpressionSlot;
-import flaxbeard.automata.client.gui.codeblock.component.StringComponent;
+import flaxbeard.automata.common.codeblock.base.CodeBlockExpression;
+import flaxbeard.automata.common.codeblock.component.ExpressionSlot;
+import flaxbeard.automata.common.codeblock.component.StringComponent;
 import net.minecraft.util.ResourceLocation;
 
 public class CodeBlockAdd extends CodeBlockExpression {
@@ -11,7 +11,7 @@ public class CodeBlockAdd extends CodeBlockExpression {
     static
     {
         ResourceLocation id = new ResourceLocation(Automata.MODID, "add");
-        CodeBlockRegistry.registerFactory(id, CodeBlockAdd.class, (Void v) -> new CodeBlockAdd());
+        CodeBlockRegistry.registerCodeBlock(id, CodeBlockAdd.class);
     }
 
     public CodeBlockAdd() {

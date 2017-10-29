@@ -1,12 +1,13 @@
-package flaxbeard.automata.client.gui.codeblock.base;
+package flaxbeard.automata.common.codeblock.base;
 
 import flaxbeard.automata.Automata;
 import flaxbeard.automata.client.gui.GuiProgrammer;
-import flaxbeard.automata.client.gui.codeblock.CodeBlockRegistry;
-import flaxbeard.automata.client.gui.codeblock.component.BlockSlot;
-import flaxbeard.automata.client.gui.codeblock.component.Component;
+import flaxbeard.automata.common.codeblock.CodeBlockRegistry;
+import flaxbeard.automata.common.codeblock.component.BlockSlot;
+import flaxbeard.automata.common.codeblock.component.Component;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
@@ -308,11 +309,25 @@ public abstract class CodeBlock {
     }
 
     protected NBTTagCompound saveData(NBTTagCompound compound) {
+        NBTTagList slotTagList = new NBTTagList();
+        for (BlockSlot slot : slots) {
+            NBTTagCompound slotTag = new NBTTagCompound();
+            if (slot.getContents() != null) {
+                slotTag = slot.getContents().writeToNBT(slotTag);
+            }
+            slotTagList.appendTag(slotTag);
+        }
+        compound.setTag("slots", slotTagList);
         return compound;
     }
 
-    protected NBTTagCompound loadData(NBTTagCompound compound) {
-        return compound;
+    protected void loadData(NBTTagCompound compound) {
+        NBTTagList slotTagList = (NBTTagList) compound.getTag("slots");
+        for (int i = 0; i < slotTagList.tagCount(); i++) {
+            NBTTagCompound slotTag = slotTagList.getCompoundTagAt(i);
+            CodeBlock block = CodeBlockRegistry.loadFromNBT(slotTag);
+            slots[i].setContents(block);
+        }
     }
 
 }

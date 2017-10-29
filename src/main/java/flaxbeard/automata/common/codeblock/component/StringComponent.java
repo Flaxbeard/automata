@@ -1,4 +1,4 @@
-package flaxbeard.automata.client.gui.codeblock.component;
+package flaxbeard.automata.common.codeblock.component;
 
 import flaxbeard.automata.client.gui.GuiProgrammer;
 import net.minecraft.client.Minecraft;

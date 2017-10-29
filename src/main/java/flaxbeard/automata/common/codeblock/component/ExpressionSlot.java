@@ -1,8 +1,8 @@
-package flaxbeard.automata.client.gui.codeblock.component;
+package flaxbeard.automata.common.codeblock.component;
 
-import flaxbeard.automata.client.gui.codeblock.base.CodeBlock;
-import flaxbeard.automata.client.gui.codeblock.base.CodeBlockExpression;
-import flaxbeard.automata.client.gui.codeblock.Type;
+import flaxbeard.automata.common.codeblock.base.CodeBlock;
+import flaxbeard.automata.common.codeblock.base.CodeBlockExpression;
+import flaxbeard.automata.common.codeblock.Type;
 
 public class ExpressionSlot extends BlockSlot {
 

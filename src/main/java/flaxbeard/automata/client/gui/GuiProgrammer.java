@@ -1,17 +1,19 @@
 package flaxbeard.automata.client.gui;
 
 import flaxbeard.automata.Automata;
-import flaxbeard.automata.client.gui.codeblock.*;
-import flaxbeard.automata.client.gui.codeblock.base.CodeBlock;
-import flaxbeard.automata.client.gui.codeblock.base.CodeBlockStatement;
-import flaxbeard.automata.client.gui.codeblock.component.BlockSlot;
-import flaxbeard.automata.client.gui.codeblock.component.ExpressionSlot;
-import flaxbeard.automata.client.gui.codeblock.component.StringComponent;
+import flaxbeard.automata.common.codeblock.*;
+import flaxbeard.automata.common.codeblock.base.CodeBlock;
+import flaxbeard.automata.common.codeblock.base.CodeBlockStatement;
+import flaxbeard.automata.common.codeblock.component.BlockSlot;
 import flaxbeard.automata.common.block.tile.TileEntityProgrammer;
+import flaxbeard.automata.common.network.PacketHandler;
+import flaxbeard.automata.common.network.UpdateProgrammerPacket;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Mouse;
 
@@ -30,7 +32,7 @@ public class GuiProgrammer extends GuiContainer {
 
     public static class CodeBlockWrapper {
 
-        private final CodeBlock block;
+        private CodeBlock block;
 
         private int x;
         private int y;
@@ -82,6 +84,19 @@ public class GuiProgrammer extends GuiContainer {
         public CodeBlock getBlock() {
             return block;
         }
+
+        public void readFromNBT(NBTTagCompound compound) {
+            x = compound.getInteger("x");
+            y = compound.getInteger("y");
+            block = CodeBlockRegistry.loadFromNBT(compound.getCompoundTag("block"));
+        }
+
+        public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+            compound.setInteger("x", x);
+            compound.setInteger("y", y);
+            compound.setTag("block", block.writeToNBT(new NBTTagCompound()));
+            return compound;
+        }
     }
 
     public GuiProgrammer(InventoryPlayer inventoryPlayer, TileEntityProgrammer programmer) {
@@ -89,46 +104,45 @@ public class GuiProgrammer extends GuiContainer {
         this.programmer = programmer;
         this.ySize = 114 + 6 * 18;
 
-        codeBlockWrappers = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            codeBlockWrappers.add(
-                    new CodeBlockWrapper(
-                            new CodeBlockAdd(),
-                            10,
-                            10
-                    )
-            );
+        loadFromNBT(programmer.getData());
+        if (codeBlockWrappers.size() == 0) {
+            for (int i = 0; i < 10; i++) {
+                codeBlockWrappers.add(
+                        new CodeBlockWrapper(
+                                new CodeBlockAdd(),
+                                10,
+                                10
+                        )
+                );
+            }
+            for (int i = 0; i < 10; i++) {
+                codeBlockWrappers.add(
+                        new CodeBlockWrapper(
+                                new CodeBlockPosition(),
+                                20,
+                                20
+                        )
+                );
+            }
+            for (int i = 0; i < 10; i++) {
+                codeBlockWrappers.add(
+                        new CodeBlockWrapper(
+                                new CodeBlockMineArea(),
+                                30,
+                                30
+                        )
+                );
+            }
+            for (int i = 0; i < 10; i++) {
+                codeBlockWrappers.add(
+                        new CodeBlockWrapper(
+                                new CodeBlockMove(),
+                                40,
+                                40
+                        )
+                );
+            }
         }
-        for (int i = 0; i < 10; i++) {
-            codeBlockWrappers.add(
-                    new CodeBlockWrapper(
-                            new CodeBlockPosition(),
-                            20,
-                            20
-                    )
-            );
-        }
-        for (int i = 0; i < 10; i++) {
-            codeBlockWrappers.add(
-                    new CodeBlockWrapper(
-                            new CodeBlockMineArea(),
-                            30,
-                            30
-                    )
-            );
-        }
-        for (int i = 0; i < 10; i++) {
-            codeBlockWrappers.add(
-                    new CodeBlockWrapper(
-                            new CodeBlockMove(),
-                            40,
-                            40
-                    )
-            );
-        }
-
-
     }
 
     @Override
@@ -294,5 +308,38 @@ public class GuiProgrammer extends GuiContainer {
         block.removeFromParent();
         codeBlockWrappers.add(newPos);
         return newPos;
+    }
+
+    @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
+        programmer.setData(writeToNBT(new NBTTagCompound()));
+        PacketHandler.INSTANCE.sendToServer(new UpdateProgrammerPacket(programmer, writeToNBT(new NBTTagCompound())));
+    }
+
+    private NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        NBTTagList wrapperTagList = new NBTTagList();
+        for (int i = 0; i < codeBlockWrappers.size(); i++) {
+            NBTTagCompound wrapperTag = new NBTTagCompound();
+            codeBlockWrappers.get(i).writeToNBT(wrapperTag);
+            wrapperTagList.appendTag(wrapperTag);
+        }
+        compound.setTag("wrappers", wrapperTagList);
+        return compound;
+    }
+
+
+    private void loadFromNBT(NBTTagCompound compound) {
+        codeBlockWrappers = new ArrayList<>();
+        if (compound.hasKey("wrappers")) {
+            NBTTagList wrapperTagList = (NBTTagList) compound.getTag("wrappers");
+            for (int i = 0; i < wrapperTagList.tagCount(); i++) {
+                NBTTagCompound wrapperTag = wrapperTagList.getCompoundTagAt(i);
+
+                CodeBlockWrapper wrapper = new CodeBlockWrapper(null, 0, 0);
+                wrapper.readFromNBT(wrapperTag);
+                codeBlockWrappers.add(wrapper);
+            }
+        }
     }
 }
