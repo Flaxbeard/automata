@@ -15,14 +15,14 @@ public class CodeBlockTwenty extends CodeBlockExpression {
     }
 
     @Override
-    public boolean canTakeType(Type<T> type) {
+    public boolean canTakeType(Type type) {
         return type == Type.POSITION;
     }
 
     @Override
     public <T> Expression<T> toExpression(Type<T> type) {
         System.out.println("TE");
-        if (type == Vec3d.class) {
+        if (type == Type.POSITION) {
             return (Expression<T>) new ExprFixedPos(new Vec3d(1, 0, 0));
         }
         return null;

@@ -23,7 +23,7 @@ public class CodeBlockMine extends CodeBlockStatement {
 
     @Override
     public Statement toStatement() {
-        Expression<Vec3d> expr = ((CodeBlockExpression) slots[0].getContents()).toExpression(Vec3d.class);
+        Expression<Vec3d> expr = ((CodeBlockExpression) slots[0].getContents()).toExpression(Type.POSITION);
         return new StmtMine(expr, getFollowingStatement());
     }
 }

@@ -15,13 +15,13 @@ public class CodeBlockCurrPos extends CodeBlockExpression {
     }
 
     @Override
-    public boolean canTakeType(Type<T> type) {
+    public boolean canTakeType(Type type) {
         return type == Type.POSITION;
     }
 
     @Override
     public <T> Expression<T> toExpression(Type<T> type) {
-        if (type == Vec3d.class) {
+        if (type == Type.POSITION) {
             return (Expression<T>) new ExprCurrentPos();
         }
         return null;

@@ -18,13 +18,13 @@ public class CodeBlockAddPos extends CodeBlockExpression {
     }
 
     @Override
-    public boolean canTakeType(Type<T> type) {
+    public boolean canTakeType(Type type) {
         return type == Type.POSITION;
     }
 
     @Override
     public <T> Expression<T> toExpression(Type<T> type) {
-        if (type == Vec3d.class) {
+        if (type == Type.POSITION) {
             Expression<Vec3d> addOne = (Expression<Vec3d>) ((CodeBlockExpression) slots[0].getContents()).toExpression(type);
             Expression<Vec3d> addTwo = (Expression<Vec3d>) ((CodeBlockExpression) slots[1].getContents()).toExpression(type);
 
