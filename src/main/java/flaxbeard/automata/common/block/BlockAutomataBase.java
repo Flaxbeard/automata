@@ -21,7 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldNameable;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import flaxbeard.automata.common.CyberwareContent;
+import flaxbeard.automata.common.AutomataContent;
 import flaxbeard.automata.common.block.item.ItemBlockAutomata;
 
 public class BlockAutomataBase extends Block
@@ -52,7 +52,7 @@ public class BlockAutomataBase extends Block
 		{
 			ItemBlock ib = new ItemBlockAutomata(this);
 			ib.setRegistryName(name);
-			CyberwareContent.items.add(ib);
+			AutomataContent.items.add(ib);
 		}
 
 		this.setUnlocalizedName(Automata.MODID + "." + name);
@@ -66,7 +66,7 @@ public class BlockAutomataBase extends Block
 			GameRegistry.registerTileEntity(((ITileEntityProvider) this).createNewTileEntity(null, 0).getClass(), Automata.MODID + ":" + name);
 		}
 
-		CyberwareContent.blocks.add(this);
+		AutomataContent.blocks.add(this);
 	}
 
 	public void breakBlock(World worldIn, BlockPos pos, IBlockState state)

@@ -131,40 +131,15 @@ public abstract class CodeBlock {
     }
 
     protected int drawLeftEdge(GuiProgrammer gui) {
-        /*gui.drawTexturedModalRect(0, 0, 102, 0, 2, getRenderHeight() - 2);
+        gui.drawTexturedModalRect(0, 0, 102, 0, 2, getRenderHeight() - 2);
         gui.drawTexturedModalRect(0, getRenderHeight() - 2, 102, 98, 2, 2);
-        return 2;*/
-
-        for (int i = 1; i < getRenderHeight() - 1; i++) {
-            float percentage = i / (getRenderHeight() - 1.0f);
-            int type = (int) (percentage * 10);
-
-            if (type < 5) {
-                gui.drawTexturedModalRect(0, i, 5, type, 5, 1);
-            } else {
-                gui.drawTexturedModalRect(0, i, 0, (type - 5) + 99, 5, 1);
-            }
-        }
-
-        return 5;
+        return 2;
     }
 
     protected int drawRightEdge(GuiProgrammer gui) {
-        /*gui.drawTexturedModalRect(getRenderWidth() - 2, 0, 98, 0, 2, getRenderHeight());
+        gui.drawTexturedModalRect(getRenderWidth() - 2, 0, 98, 0, 2, getRenderHeight());
         gui.drawTexturedModalRect(getRenderWidth() - 2, getRenderHeight() - 2, 98, 98, 2, 2);
-        return 2;*/
-        for (int i = 1; i < getRenderHeight() - 1; i++) {
-            float percentage = i / (getRenderHeight() - 1.0f);
-            int type = (int) (percentage * 10);
-
-            if (type < 5) {
-                gui.drawTexturedModalRect(getRenderWidth() - 5, i, 1, type, 4, 1);
-            } else {
-                gui.drawTexturedModalRect(getRenderWidth() - 5, i, 6, (type - 5) + 99, 4, 1);
-            }
-        }
-
-        return 5;
+        return 2;
     }
 
     public void drawForeground(GuiProgrammer gui) {

@@ -1,7 +1,7 @@
 package flaxbeard.automata.common.item;
 
 import flaxbeard.automata.Automata;
-import flaxbeard.automata.common.CyberwareContent;
+import flaxbeard.automata.common.AutomataContent;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -25,7 +25,7 @@ public class ItemAutomataBase extends Item
 
 		this.setMaxStackSize(stackSize);
 
-		CyberwareContent.items.add(this);
+		AutomataContent.items.add(this);
 	}
 
 	@Override

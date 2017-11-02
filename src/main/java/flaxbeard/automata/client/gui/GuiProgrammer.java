@@ -9,7 +9,6 @@ import flaxbeard.automata.common.block.tile.TileEntityProgrammer;
 import flaxbeard.automata.common.network.PacketHandler;
 import flaxbeard.automata.common.network.UpdateProgrammerPacket;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,125 +21,41 @@ import java.util.List;
 
 public class GuiProgrammer extends GuiContainer {
 
-    private static final float BLOCK_SCALE = 0.5f;
+    protected static final float BLOCK_SCALE = 0.5f;
 
     private static final ResourceLocation PROGRAMMER_TEXTURES =
             new ResourceLocation(Automata.MODID + ":textures/gui/programmer.png");
 
     private final TileEntityProgrammer programmer;
     private List<CodeBlockWrapper> codeBlockWrappers;
+    private List<CodeBlockTemplate> codeBlockTemplates;
 
-    public static class CodeBlockWrapper {
-
-        private CodeBlock block;
-
-        private int x;
-        private int y;
-
-        public CodeBlockWrapper(CodeBlock block, int x, int y) {
-            this.block = block;
-            this.x = x;
-            this.y = y;
-        }
-
-        public void drawForeground(GuiProgrammer gui) {
-            GlStateManager.pushMatrix();
-            GlStateManager.translate(x, y, 0);
-            GlStateManager.scale(BLOCK_SCALE, BLOCK_SCALE, 0);
-            block.drawForeground(gui);
-            GlStateManager.popMatrix();
-        }
-
-        public void drawBackground(GuiProgrammer gui) {
-            GlStateManager.pushMatrix();
-            GlStateManager.translate(x, y, 0);
-            GlStateManager.scale(BLOCK_SCALE, BLOCK_SCALE, 0);
-            block.drawBackground(gui);
-            GlStateManager.popMatrix();
-        }
-
-        public int getX() {
-            return x;
-        }
-
-        public int getY() {
-            return y;
-        }
-
-        public CodeBlockWrapper setPos(int x, int y) {
-            this.x = x;
-            this.y = y;
-            return this;
-        }
-
-        public int getHeight() {
-            return (int) (block.getHeight() * BLOCK_SCALE);
-        }
-
-        public int getWidth() {
-            return (int) (block.getWidth() * BLOCK_SCALE);
-        }
-
-        public CodeBlock getBlock() {
-            return block;
-        }
-
-        public void readFromNBT(NBTTagCompound compound) {
-            x = compound.getInteger("x");
-            y = compound.getInteger("y");
-            block = CodeBlockRegistry.loadFromNBT(compound.getCompoundTag("block"));
-        }
-
-        public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-            compound.setInteger("x", x);
-            compound.setInteger("y", y);
-            compound.setTag("block", block.writeToNBT(new NBTTagCompound()));
-            return compound;
-        }
-    }
+    private int tab;
 
     public GuiProgrammer(InventoryPlayer inventoryPlayer, TileEntityProgrammer programmer) {
         super(new ContainerProgrammer(inventoryPlayer, programmer));
         this.programmer = programmer;
         this.ySize = 114 + 6 * 18;
 
+        tab = 0;
+
         loadFromNBT(programmer.getData());
         if (codeBlockWrappers.size() == 0) {
-            for (int i = 0; i < 10; i++) {
-                codeBlockWrappers.add(
-                        new CodeBlockWrapper(
-                                new CodeBlockAdd(),
-                                10,
-                                10
-                        )
-                );
-            }
-            for (int i = 0; i < 10; i++) {
-                codeBlockWrappers.add(
-                        new CodeBlockWrapper(
-                                new CodeBlockPosition(),
-                                20,
-                                20
-                        )
-                );
-            }
-            for (int i = 0; i < 10; i++) {
-                codeBlockWrappers.add(
-                        new CodeBlockWrapper(
-                                new CodeBlockMineArea(),
-                                30,
-                                30
-                        )
-                );
-            }
-            for (int i = 0; i < 10; i++) {
-                codeBlockWrappers.add(
-                        new CodeBlockWrapper(
-                                new CodeBlockMove(),
-                                40,
-                                40
-                        )
-                );
+            codeBlockWrappers.add(new CodeBlockWrapper(
+                    new CodeBlockHead(),
+                    100,
+                    0
+            ));
+        }
+
+        int x = 0;
+        int y = 0;
+        codeBlockTemplates = new ArrayList<>();
+        for (CodeBlock codeBlockType : CodeBlockRegistry.getAllCodeBlocks()) {
+            if (!(codeBlockType instanceof CodeBlockHead)) {
+                CodeBlockTemplate template = new CodeBlockTemplate(codeBlockType, x, y);
+                y += template.getHeight() + 2;
+                codeBlockTemplates.add(template);
             }
         }
     }
@@ -162,6 +77,12 @@ public class GuiProgrammer extends GuiContainer {
 
 
         for (CodeBlockWrapper block : codeBlockWrappers) {
+            block.drawBackground(this);
+            block.drawForeground(this);
+            RenderHelper.disableStandardItemLighting();
+        }
+
+        for (CodeBlockTemplate block : codeBlockTemplates) {
             block.drawBackground(this);
             block.drawForeground(this);
             RenderHelper.disableStandardItemLighting();
@@ -189,6 +110,14 @@ public class GuiProgrammer extends GuiContainer {
                     draggingWrapper = hoveredBlock;
                     offsetX = mouseX - hoveredBlock.getX();
                     offsetY = mouseY - hoveredBlock.getY();
+                }
+
+                CodeBlockTemplate hoveredTemplate = getHoveredTemplate(mouseX, mouseY);
+                if (hoveredTemplate != null) {
+                    isDragging = true;
+                    draggingWrapper = hoveredTemplate.getCopy();
+                    offsetX = mouseX - hoveredTemplate.getX();
+                    offsetY = mouseY - hoveredTemplate.getY();
                 }
             }
             if (isDragging) {
@@ -303,6 +232,20 @@ public class GuiProgrammer extends GuiContainer {
         return null;
     }
 
+    private CodeBlockTemplate getHoveredTemplate(int mouseX, int mouseY) {
+        for (int i = codeBlockTemplates.size() - 1; i >= 0; i--) {
+            CodeBlockTemplate codeBlockTemplate = codeBlockTemplates.get(i);
+
+            boolean hovering = (mouseX >= codeBlockTemplate.getX() && mouseX <= codeBlockTemplate.getX() + codeBlockTemplate.getWidth())
+                    && (mouseY >= codeBlockTemplate.getY() && mouseY <= codeBlockTemplate.getY() + codeBlockTemplate.getHeight());
+
+            if (hovering) {
+                return codeBlockTemplate;
+            }
+        }
+        return null;
+    }
+
     private CodeBlockWrapper removeBlockFromParent(int x, int y, CodeBlock block) {
         CodeBlockWrapper newPos = new CodeBlockWrapper(block, x, y);
         block.removeFromParent();
@@ -323,6 +266,10 @@ public class GuiProgrammer extends GuiContainer {
             NBTTagCompound wrapperTag = new NBTTagCompound();
             codeBlockWrappers.get(i).writeToNBT(wrapperTag);
             wrapperTagList.appendTag(wrapperTag);
+
+            if (codeBlockWrappers.get(i).getBlock() instanceof CodeBlockHead) {
+                compound.setTag("head", codeBlockWrappers.get(i).getBlock().writeToNBT(new NBTTagCompound()));
+            }
         }
         compound.setTag("wrappers", wrapperTagList);
         return compound;
@@ -338,7 +285,9 @@ public class GuiProgrammer extends GuiContainer {
 
                 CodeBlockWrapper wrapper = new CodeBlockWrapper(null, 0, 0);
                 wrapper.readFromNBT(wrapperTag);
-                codeBlockWrappers.add(wrapper);
+                if (wrapper.getBlock() != null) {
+                    codeBlockWrappers.add(wrapper);
+                }
             }
         }
     }

@@ -6,9 +6,9 @@ import flaxbeard.automata.common.codeblock.Type;
 
 public class ExpressionSlot extends BlockSlot {
 
-    private final Type type;
+    public final Type<T> type;
 
-    public ExpressionSlot(Type type) {
+    public ExpressionSlot(Type<T> type) {
         this.type = type;
     }
     

@@ -5,6 +5,7 @@ import flaxbeard.automata.common.codeblock.CodeBlockRegistry;
 import flaxbeard.automata.common.codeblock.component.BlockSlot;
 import flaxbeard.automata.common.codeblock.component.Component;
 import flaxbeard.automata.common.codeblock.component.FollowingSlot;
+import flaxbeard.automata.common.program.base.Statement;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class CodeBlockStatement extends CodeBlock {
@@ -39,7 +40,7 @@ public abstract class CodeBlockStatement extends CodeBlock {
         if (followingSlot != null) {
             followingSlot.setStartY(y);
             followingSlot.setEndY(y + followingSlot.getHeight());
-            height += followingSlot.getHeight();
+            height += followingSlot.getHeight() - 1;
             followingSlot.setStartX(0);
             followingSlot.setEndX(followingSlot.getWidth());
 
@@ -102,4 +103,17 @@ public abstract class CodeBlockStatement extends CodeBlock {
         NBTTagCompound followingSlotTag = compound.getCompoundTag("followingSlot");
         followingSlot.setContents(CodeBlockRegistry.loadFromNBT(followingSlotTag));
     }
+
+    public boolean hasTopConnection() {
+        return true;
+    }
+
+    public Statement getFollowingStatement() {
+        if (followingSlot.getContents() != null) {
+            return ((CodeBlockStatement) followingSlot.getContents()).toStatement();
+        }
+        return null;
+    }
+
+    public abstract Statement toStatement();
 }

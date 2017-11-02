@@ -8,7 +8,8 @@ public class FollowingSlot extends BlockSlot {
 
     @Override
     public boolean isBlockValid(CodeBlock block) {
-        return block instanceof CodeBlockStatement;
+        return block instanceof CodeBlockStatement
+                && ((CodeBlockStatement) block).hasTopConnection();
     }
 
     @Override

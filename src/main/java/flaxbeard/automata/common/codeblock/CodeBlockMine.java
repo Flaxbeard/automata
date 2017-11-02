@@ -5,17 +5,18 @@ import flaxbeard.automata.common.codeblock.base.CodeBlockExpression;
 import flaxbeard.automata.common.codeblock.base.CodeBlockStatement;
 import flaxbeard.automata.common.codeblock.component.ExpressionSlot;
 import flaxbeard.automata.common.codeblock.component.StringComponent;
+import flaxbeard.automata.common.program.StmtMine;
+import flaxbeard.automata.common.program.StmtMove;
 import flaxbeard.automata.common.program.base.Expression;
 import flaxbeard.automata.common.program.base.Statement;
-import flaxbeard.automata.common.program.StmtMove;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
-public class CodeBlockMove extends CodeBlockStatement {
+public class CodeBlockMine extends CodeBlockStatement {
 
-    public CodeBlockMove() {
+    public CodeBlockMine() {
         super(
-                new StringComponent("Move to"),
+                new StringComponent("Mine block "),
                 new ExpressionSlot(Type.POSITION)
         );
     }
@@ -23,6 +24,6 @@ public class CodeBlockMove extends CodeBlockStatement {
     @Override
     public Statement toStatement() {
         Expression<Vec3d> expr = ((CodeBlockExpression) slots[0].getContents()).toExpression(Vec3d.class);
-        return new StmtMove(expr, getFollowingStatement());
+        return new StmtMine(expr, getFollowingStatement());
     }
 }

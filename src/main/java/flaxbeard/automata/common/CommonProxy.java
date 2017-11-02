@@ -15,7 +15,7 @@ public class CommonProxy
 {
 	public void preInit()
 	{
-		CyberwareContent.preInit();
+		AutomataContent.preInit();
 		PacketHandler.preInit();
 	}
 
@@ -32,7 +32,7 @@ public class CommonProxy
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
 	{
-		for (Block block : CyberwareContent.blocks)
+		for (Block block : AutomataContent.blocks)
 		{
 			event.getRegistry().register(block);
 		}
@@ -41,7 +41,7 @@ public class CommonProxy
 	@SubscribeEvent
 	public static void registerItems(RegistryEvent.Register<Item> event)
 	{
-		for (Item item : CyberwareContent.items)
+		for (Item item : AutomataContent.items)
 		{
 			event.getRegistry().register(item);
 		}
